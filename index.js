@@ -6,16 +6,14 @@ const cors = require("cors");
 const http = require("http");
 const socketio = require("socket.io")
 const fs = require("fs");
+
 const { json } = require("stream/consumers");
 require("dotenv").config();
 const server = http.createServer(app)
 app.use(express.json());
 let viewer =[];
 // Allow all origins for CORS (can be restricted in production)
-app.use(cors({
-    origin: '*',
-    methods: ["GET", "POST"]
-}));
+app.use(cors());
 
 
 
@@ -117,6 +115,7 @@ app.post("/end",async(req,resp)=>{
 
 // socket in the end
 const io = socketio(server);
+app.use(cors());
 io.on('connection',(socket)=>{
    
     console.log(socket.id,"A user is connected")
