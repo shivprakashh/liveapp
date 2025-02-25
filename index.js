@@ -74,7 +74,7 @@ const viewj = req.body;
 console.log(viewj,"this is keysss")
 const rawdata = fs.readFileSync("key.json")
 const rawjson = JSON.parse(rawdata);
-console.log(rawjson,"this raww json")
+console.log(rawjson,"this raww json of my file key json")
 const result = rawjson.find(item => item["key"]===req.body.key)
   if(result){
     console.log("found success fully",result)
@@ -134,11 +134,11 @@ socket.on("offer",(d)=>{
     // Relay answer from viewer to broadcaster
     
     socket.on('ice-candidate', (d) => {
-        console.log('ICE candidate received', d.candidate);
+        console.log('ICE candidate received');
         io.to(d.to).emit('ice-candidate', {from:d.from,candidate:d.candidate});
     });
     socket.on('answer', (d) => {
-        console.log(d.to,d.from,d.answer)
+        console.log(d.to,d.from)
         // Send answer to the broadcaster
       
         io.to(d.to).emit('answer', {answer:d.answer ,from:d.from});
