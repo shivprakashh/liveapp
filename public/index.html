@@ -18,10 +18,10 @@
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .parent {
-        width: 100vw;
+        width: 100%;
         background: rgb(4,58,139);
         background: linear-gradient(90deg, rgba(4,58,139,1) 2%, rgba(14,13,14,1) 51%, rgba(237,229,0,1) 89%);
-        height: 100vh;
+        height: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -42,7 +42,7 @@
         gap: 20px;
         box-shadow: 0px 0px 10px 2px rgb(50, 50, 50);
         color: white;
-        padding: 100px 30px;
+        padding: 10px 10px;
     }
     .search-con {
         display: flex;
@@ -113,6 +113,15 @@
         transform: scaleX(-1);
         background-color: white;
     }
+    @media (max-width: 800px) {
+.con{
+    width:98%;
+    height:auto;
+    padding:60px 10px;
+
+
+}
+}
 </style>
 <body>
     <div class="parent">
