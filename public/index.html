@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live App</title>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body, html {
+        width: 100%;
+        height: 100%;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .parent {
+        width: 100vw;
+        background: rgb(4,58,139);
+        background: linear-gradient(90deg, rgba(4,58,139,1) 2%, rgba(14,13,14,1) 51%, rgba(237,229,0,1) 89%);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .con {
+        width: 500px;
+        height: auto;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 20px;
+        box-shadow: 0px 0px 10px 2px rgb(50, 50, 50);
+        color: white;
+        padding: 20px 10px;
+    }
+    .search-con {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        padding: 0;
+    }
+    .password {
+        width: 80%;
+        height: 40px;
+        padding: 3px 7px;
+        border: none;
+    }
+    .search-but {
+        width: 20%;
+        height: 40px;
+        border: none;
+        background-color: yellow;
+        box-shadow: inset 0px 0px 10px 1px black;
+    }
+    .search-but:hover {
+        background-color: green;
+        color: white;
+        cursor: pointer;
+    }
+    .view-but {
+        background-color: red;
+        padding: 5px 19px;
+        color: white;
+        box-shadow: 0px 0px 10px 1px black;
+        animation: view 1s infinite ease-in;
+    }
+    .view-but:hover {
+        background-color: green;
+        cursor: pointer;
+    }
+    .displayon {
+        display: flex !important;
+    }
+    @keyframes view {
+        0% {transform: scale(1);}
+        50% {transform: scale(1.2);}
+        100% {transform: scale(1);}
+    }
+    .show {
+        width: 100%;
+        height: 100%;
+        background-color: rgba(26, 25, 25, 0.632);
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+    }
+    .end {
+        position: absolute;
+        right: 40px;
+        top: 20px;
+        cursor: pointer;
+        background-color: rgb(255, 0, 0);
+        border-radius: 4px;
+        padding: 3px 10px;
+        box-shadow: inset 0px 0px 10px 3px rgb(134, 133, 133);
+    }
+    #video {
+        width: 100%;
+        height: 100%;
+        transform: scaleX(-1);
+    }
+</style>
+<body>
+    <div class="parent">
+        <div class="con">
+            <div class="search-con">
+                <input class="password" placeholder="Pass key of live person" type="text">
+                <button class="search-but">Find</button>
+            </div>
+            <h3>OR</h3>
+            <p class="view-but">Do you wanna go live</p>
+        </div>
+    </div>
+    <div class="show">
+        <video id="video" autoplay muted></video>
+       
+        <p class="end">END</p>
+    </div>
+
+    <script>
+     const socket = io();
+let apiurl = "http://localhost:4000";
+const video = document.getElementById("video");
+const show = document.querySelector(".show");
+const password = document.querySelector(".password");
+const searchbut = document.querySelector(".search-but");
+const viewbut = document.querySelector(".view-but");
+const end = document.querySelector(".end");
+
+let userid, key, localStream;
+let peerConnection, peerConnectionview;
+
+const iceServers = [
+
+{ urls: "stun:stun2.l.google.com:19302" },
+    {
+        urls: 'turn:relay1.expressturn.com:3478',
+        username: 'efT5G6CG5SW92BXA9E',
+        credential: 'FVLSr0MIWhh0RCrl'
+    }
+];
+
+socket.on("vieweridget", (d) => {
+    userid = d;
+    console.log("Received viewer ID:", d);
+});
+
+socket.emit("viewer", "Hello, this is thet naing tun");
+
+async function fetchPost(url, data) {
+    console.log("Sending POST request to:", url, "with data:", data);
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key: data, userid: userid })
+        });
+        return response;
+    } catch (error) {
+        console.error("Error in fetchPost:", error);
+    }
+}
+
+searchbut.addEventListener("click", async () => {
+    const inputval = password.value.trim();
+    console.log("Search button clicked with key:", inputval);
+    if (!inputval) return;
+    let url = `${apiurl}/find`;
+    let response = await fetchPost(url, inputval);
+    if (response.status === 200) {
+        show.classList.add("displayon");
+        const data = await response.json();
+        key = data.key;
+        socket.emit("imconnect", { key, userid,liveusersocket:data.liveusersocket});
+        console.log("Connected as viewer with key:", key);
+      
+    } else {
+        console.error("No user found with key:", inputval);
+        alert("No user with this key!");
+    }
+});
+
+viewbut.addEventListener("click", async () => {
+    console.log("Going live...");
+    peerConnection = new RTCPeerConnection({ iceServers });
+    key = prompt("Enter a key and share it with your audience.");
+    if (!key) return;
+    let url = `${apiurl}/hoster`;
+    let response = await fetchPost(url, key);
+    if (response.status === 200) {
+        show.classList.add("displayon");
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = localStream;
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        console.log("Local stream started");
+    } else {
+        console.error("Failed to create a key");
+        alert("Please create a key");
+    }
+});
+
+socket.on("viewer-connected", async (d) => {
+    console.log("Viewer connected:", d);
+    peerConnection.onicecandidate = event => {
+                if (event.candidate) {
+                    console.log("Sending ICE candidate from streamer:", event.candidate);
+                 
+                    socket.emit("ice-candidate", { to: d.from, from: userid, key: key, candidate:event.candidate });
+                }
+            };
+    peerConnection.createOffer().then(offer => {
+        console.log("Created offer:", offer);
+        return peerConnection.setLocalDescription(offer);
+    }).then(() => {
+        console.log("Sending offer to viewer:", peerConnection.localDescription);
+        socket.emit("offer", { to: d.from, from: userid, key: key, offer: peerConnection.localDescription });
+    }).catch(error => console.error("Error in creating offer:", error));
+});
+
+socket.on('offer', async (d) => {
+    console.log("Received offer from streamer:", d);
+    peerConnectionview = new RTCPeerConnection({ iceServers });
+    peerConnectionview.ontrack = (event) => {
+        console.log("tracking receive in peerconnectionview:", event);
+        if (event.streams[0]) {
+            video.srcObject = event.streams[0];
+        }
+    };
+    await peerConnectionview.setRemoteDescription(new RTCSessionDescription(d.offer));
+    const answer = await peerConnectionview.createAnswer();
+    await peerConnectionview.setLocalDescription(answer);
+    console.log("Sending answer to streamer:", answer);
+    socket.emit('answer', { to: d.from, answer: peerConnectionview.localDescription, from: userid });
+    peerConnectionview.onicecandidate = event => {
+        if (event.candidate) {
+            socket.emit("ice-candidate", { to: d.from, candidate: event.candidate,from:userid });
+        }
+    };
+});
+
+socket.on("ice-candidate", (data) => {
+    console.log("Received ICE candidate:", data);
+    if (peerConnection && data.to === userid) {
+        peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+    } else if (peerConnectionview && data.to === userid) {
+        peerConnectionview.addIceCandidate(new RTCIceCandidate(data.candidate));
+    }
+    
+});
+
+socket.on("answer", (data) => {
+    console.log("Received answer:", data);
+    if (peerConnection) {
+        peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+    }
+});
+
+
+end.addEventListener("click", async () => {
+    console.log("Ending stream...");
+    let url = `${apiurl}/end`;
+    let response = await fetchPost(url, key);
+    if (response.status === 200) {
+        console.log("Stream ended successfully");
+        location.reload();
+    } else {
+        console.error("Failed to end stream");
+    }
+});
+
+    </script>
+</body>
+</html>
