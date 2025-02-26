@@ -19,8 +19,8 @@
     }
     .parent {
         width: 100%;
-        background: rgb(4,58,139);
-        background: linear-gradient(90deg, rgba(4,58,139,1) 2%, rgba(14,13,14,1) 51%, rgba(237,229,0,1) 89%);
+        background-color: white;
+        
         height: 100%;
         display: flex;
         justify-content: center;
@@ -28,7 +28,7 @@
         flex-direction: column;
     }
     h4{
-        color:white;
+        color:black;
         margin-bottom: 10px;
     }
     .con {
@@ -41,7 +41,7 @@
         flex-direction: column;
         gap: 20px;
         box-shadow: 0px 0px 10px 2px rgb(50, 50, 50);
-        color: white;
+        color:black;
         padding: 10px 10px;
     }
     .search-con {
@@ -55,7 +55,8 @@
         width: 80%;
         height: 40px;
         padding: 3px 7px;
-        border: none;
+        border: 0.5px solid grey;
+
     }
     .search-but {
         width: 20%;
@@ -98,14 +99,40 @@
         left: 0;
     }
     .end {
+       
+        cursor: pointer;
+        background-color: white;
+        color:red;
+        font-weight: bolder;
+        border-radius: 4px;
+        padding: 3px 10px;
+        box-shadow:  0px 0px 10px 3px rgb(134, 133, 133);
+    }
+    .end-con{
         position: absolute;
         right: 40px;
         top: 20px;
+        display: flex;
+        flex-direction: row;
+        gap:10px;
+    }
+    .camera-switch{
         cursor: pointer;
-        background-color: rgb(255, 0, 0);
+        background-color: white;
         border-radius: 4px;
-        padding: 3px 10px;
-        box-shadow: inset 0px 0px 10px 3px rgb(134, 133, 133);
+        color:black;
+        padding: 5px 10px;
+        box-shadow:  0px 0px 10px 3px rgb(134, 133, 133);
+        border:none;
+    }
+    .end:hover{
+        transform: scale(1.09);
+        opacity: 0.7;
+        
+    }
+    .camera-switch:hover{
+        transform: scale(1.09);
+       opacity: 0.7;
     }
     #video {
         width: 100%;
@@ -125,13 +152,13 @@
 </style>
 <body>
     <div class="parent">
-        <h4>The sadness is can dance only in the same wifi network</h4>
+        <h4>Kush kush Hota hai sweetie 🙄</h4>
         <div class="con">
             <p>Good morning...</p>
             <div class="search-con">
              
-                <input class="password" placeholder="Pass key of the person" type="text">
-                <button class="search-but">Find</button>
+                <input class="password" placeholder=" Key of the person" type="text">
+                <button class="search-but">Join</button>
             </div>
             <h3>OR</h3>
             <p class="view-but">click here and tell me the key</p>
@@ -139,14 +166,18 @@
     </div>
     <div class="show">
         <video id="video" autoplay ></video>
-       
-        <p class="end">END</p>
+        <div class="end-con">
+         
+            <p class="end">END</p>
+        </div>
+      
     </div>
 
     <script>
+        //   <button class="camera-switch">switch camera</button>
         const socket = io();
-        let apiurl = "https://liveapp-wwzq.onrender.com";
-        let apiur = "http://localhost:4000";
+        let apiur = "https://liveapp-wwzq.onrender.com";
+        let apiurl = "http://localhost:4000";
         const video = document.getElementById("video");
         const show = document.querySelector(".show");
         const password = document.querySelector(".password");
@@ -157,7 +188,8 @@
         let userid, key, localStream;
         let peerConnection, peerConnectionview;
         let viewerid;
-    
+     
+
     //
     const iceServers = [
             { urls: "stun:stun2.l.google.com:19302" },
@@ -214,7 +246,14 @@
                 alert("No user with this key!");
             }
         });
-    
+        let useFrontCamera = false;
+
+        const constraints = {
+        video: {
+            facingMode: useFrontCamera ? "user" : "environment" // "user" for front, "environment" for back
+        }
+    };
+
         viewbut.addEventListener("click", async () => {
             console.log("Going live...");
             key = prompt("Enter a key and share it with your audience.");
@@ -224,8 +263,8 @@
             if (response.status === 200) {
                 show.classList.add("displayon");
     
-                let stream = await navigator.mediaDevices.getUserMedia({ video: true });
-               
+                let stream = await navigator.mediaDevices.getUserMedia({video:true});
+               video.srcObject = stream;
     
             } else {
                 console.error("Failed to create a key");
@@ -254,8 +293,8 @@
     
             try {
               
-                const st = await navigator.mediaDevices.getUserMedia({ video: true});
-                 video.srcObject = st;
+                const st = await navigator.mediaDevices.getUserMedia({video:true});
+               
         st.getTracks().forEach(track => peerConnection.addTrack(track, st));
        
                 const offer = await peerConnection.createOffer();
