@@ -49,6 +49,7 @@ app.post("/hoster",async (req,resp)=>{
         const rawData = fs.readFileSync(filePath);
      
         let existing = await JSON.parse(rawData);
+        console.log(existing,"this is existing key;;;;")
        
         existing.push(key)
       
@@ -129,7 +130,7 @@ socket.on("imconnect",async (d)=>{
     io.to(d.liveusersocket).emit("viewer-connected",{key:d.key,from:d.userid})
 })
 socket.on("offer",(d)=>{
-    console.log(d.key,d.from,d.to,d.offer,"this is offer ")
+    console.log(d.key,d.from,d.to,"this is offer ")
     io.to(d.to).emit('offer', { key:d.key,from:d.from,offer:d.offer });
 })
     // Relay answer from viewer to broadcaster
@@ -149,9 +150,9 @@ socket.on("offer",(d)=>{
          console.log(d);
          socket.emit("vieweridget",socket.id)
     })
-    socket.on('disconnect',()=>{
-       viewer = viewer.filter((e)=> e !== socket.id)
-        console.log("enter into diccccccccc",)
+    socket.on('disconnect', ()=>{
+       viewer =  viewer.filter((e)=> e !== socket.id)
+        console.log("enter into diccccccccc",viewer)
         io.emit("listofactive",viewer.length)
 
         console.log(socket.id,"user is disconnected")

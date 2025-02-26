@@ -30,6 +30,7 @@
     h4{
         color:black;
         margin-bottom: 10px;
+        font-size: large;
     }
     .con {
         width: 500px;
@@ -221,7 +222,7 @@
     ///listofactiveusers
     socket.on("listofactive",(d)=>{
       console.log("number of active person on page",d)
-      activeusers.textContent = `Active users: ${d} person right now`;
+      activeusers.textContent = `Active users: ${d-1} person right now`;
 
     })
     ////
@@ -291,7 +292,8 @@
                 alert("Please create a key");
             }
         });
-    
+
+    ///////////////// streamer-start here ///////////////////////
         socket.on("viewer-connected", async (d) => {
           
             console.log("Viewer connected:", d);
@@ -330,7 +332,14 @@
                 console.log("Streamer ICE connection state:", peerConnection.iceConnectionState);
             };
         });
+        socket.on("answer", (data) => {
+            console.log("Received answer:", data);
+            if (peerConnection) {
+                peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+            }
+        });
     
+    //////////////////////// viewer-start ////////////////////////
         socket.on('offer', async (d) => {
             console.log("Received offer from streamer:", d);
     
@@ -390,13 +399,7 @@
             }
         });
     
-        socket.on("answer", (data) => {
-            console.log("Received answer:", data);
-            if (peerConnection) {
-                peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-            }
-        });
-    
+ /////////////////// end-button ////////////////////////////     
         end.addEventListener("click", async () => {
             console.log("Ending stream...");
             let url = `${apiurl}/end`;
