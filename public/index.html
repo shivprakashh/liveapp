@@ -149,9 +149,18 @@
 
 }
 }
+.activeusers{
+    position: fixed;
+    top:20px;
+    left:20px; 
+    z-index: 2;
+    font-weight: bolder;
+   
+}
 </style>
 <body>
     <div class="parent">
+        <p class="activeusers"></p>
         <h4>Gudd moring...🙄</h4>
         <div class="con">
             <p>You can only see if the user is live with the key</p>
@@ -184,6 +193,7 @@
         const searchbut = document.querySelector(".search-but");
         const viewbut = document.querySelector(".view-but");
         const end = document.querySelector(".end");
+        const activeusers = document.getElementsByClassName("activeusers")[0];
     
         let userid, key, localStream;
         let peerConnection, peerConnectionview;
@@ -205,7 +215,17 @@
     url: 'turn:numb.viagenie.ca',
     credential: 'muazkh',
     username: 'webrtc@live.com'
+    
 },]
+
+    ///listofactiveusers
+    socket.on("listofactive",(d)=>{
+      console.log("number of active person on page",d)
+      activeusers.textContent = `Active users: ${d} person right now`;
+
+    })
+    ////
+
         /////////////////////// Code start here ///////////////////////
     
         socket.on("vieweridget", (d) => {

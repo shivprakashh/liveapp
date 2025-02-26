@@ -115,11 +115,12 @@ app.post("/end",async(req,resp)=>{
 
 // socket in the end
 const io = socketio(server);
-app.use(cors());
+
 io.on('connection',(socket)=>{
    
     console.log(socket.id,"A user is connected")
-  ;
+     viewer.push(socket.id)
+  io.emit("listofactive",viewer.length)
 socket.on("imconnect",async (d)=>{
     console.log(d.key,d.userid);
     
@@ -149,6 +150,10 @@ socket.on("offer",(d)=>{
          socket.emit("vieweridget",socket.id)
     })
     socket.on('disconnect',()=>{
+       viewer = viewer.filter((e)=> e !== socket.id)
+        console.log("enter into diccccccccc",)
+        io.emit("listofactive",viewer.length)
+
         console.log(socket.id,"user is disconnected")
     })
 })
