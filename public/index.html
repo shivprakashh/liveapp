@@ -196,7 +196,7 @@
         const end = document.querySelector(".end");
         const activeusers = document.getElementsByClassName("activeusers")[0];
     
-        let userid, key, localStream;
+        let userid, key, localStream,st;
         let peerConnection, peerConnectionview;
         let viewerid;
      
@@ -315,7 +315,7 @@
     
             try {
               
-                const st = await navigator.mediaDevices.getUserMedia({video:true});
+                 st = await navigator.mediaDevices.getUserMedia({video:true});
                
         st.getTracks().forEach(track => peerConnection.addTrack(track, st));
        
@@ -403,14 +403,29 @@
         end.addEventListener("click", async () => {
             console.log("Ending stream...");
             let url = `${apiurl}/end`;
-            let response = await fetchPost(url, key);
-            if (response.status === 200) {
-                console.log("Stream ended successfully");
-                location.reload();
-            } else {
-                console.error("Failed to end stream");
+            if(peerConnection){
+     
+        let response = await fetchPost(url, key);
+          
+          if (response.status === 200) {
+              location.reload()
+   
+    
+              console.log("Stream ended successfully");
+             
+          } else {
+              console.error("Failed to end stream");
+          }
+
+    
+   
+            }else{
+                location.reload()
             }
+         
         });
+      
+
     </script>
     
 </body>

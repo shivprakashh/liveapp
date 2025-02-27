@@ -81,7 +81,7 @@ const result = rawjson.find(item => item["key"]===req.body.key)
     console.log("found success fully",result)
     let viewjson ={liveusersocket:result.userid,key:req.body.key,}
     const liveperson = {key:req.body.key,viewperson:req.body.userid} // live person key and viewer socket id; pushing in viewer array;
-    viewer.push(liveperson)
+   
     resp.status(200).send(viewjson)
 
   }else{
@@ -97,6 +97,7 @@ app.post("/end",async(req,resp)=>{
         console.log(key,"enteringinto end ................")
     const rawData = fs.readFileSync("key.json");
         let jsonData = JSON.parse(rawData);
+        
 
         // Use filter to keep only the items that do NOT match the key-value pair
         jsonData = jsonData.filter(item => item["key"] !== key.key);
@@ -150,8 +151,8 @@ socket.on("offer",(d)=>{
          console.log(d);
          socket.emit("vieweridget",socket.id)
     })
-    socket.on('disconnect', ()=>{
-       viewer =  viewer.filter((e)=> e !== socket.id)
+    socket.on('disconnect', async ()=>{
+       viewer =  await viewer.filter((e)=> e !== socket.id)
         console.log("enter into diccccccccc",viewer)
         io.emit("listofactive",viewer.length)
 

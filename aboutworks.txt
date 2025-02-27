@@ -1,0 +1,23 @@
+in this code//
+one person is viewer and another person is streamer;
+
+to create peer connectiong
+
+for the streamer 
+you have to create  / 1.peerconnection with constrain
+                      2.peerconnection oncandidate
+                      3.get video and addtrack
+                      4.when you want to start chat create offer and send to the viewer
+                      will add it in answer and will create answer
+                      5.when you get answer set remotedescription with that
+                      answer;
+                      6.peerconnection when get candidate 
+                      add that candidate to the addicecandidate;
+        
+for viewer 
+peerconnection with constrain
+peerconnection oncandidate
+peer ontrack add to your video tag;
+
+when got offer add it to answer and send answer;
+when got candidate add to addicecandidate;
