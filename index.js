@@ -13,7 +13,11 @@ const server = http.createServer(app)
 app.use(express.json());
 let viewer =[];
 // Allow all origins for CORS (can be restricted in production)
-app.use(cors());
+app.use(cors({
+    origin: "https://liveapp-wwzq.onrender.com", // Replace with your actual domain
+    methods: "GET,POST,PUT,DELETE",
+   
+  }));
 
 
 
@@ -116,7 +120,13 @@ app.post("/end",async(req,resp)=>{
 })
 
 // socket in the end
-const io = socketio(server);
+
+const io = socketio(server, {
+    cors: {
+      origin: "https://liveapp-wwzq.onrender.com", // Allow only this domain
+      methods: ["GET", "POST"]
+    }
+  });
 
 io.on('connection',(socket)=>{
    
